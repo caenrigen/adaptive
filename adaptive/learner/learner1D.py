@@ -201,6 +201,7 @@ class Learner1D(BaseLearner):
         self._dx_eps = 2 * max(np.abs(bounds)) * np.finfo(float).eps
 
         self.bounds = list(bounds)
+        self.__missing_bounds = set(self.bounds)  # cache of missing bounds
 
         self._vdim = None
 
@@ -231,6 +232,8 @@ class Learner1D(BaseLearner):
 
     @cache_latest
     def loss(self, real=True):
+        if self._missing_bounds():
+            return np.inf
         losses = self.losses if real else self.losses_combined
         if not losses:
             return np.inf
@@ -496,6 +499,15 @@ class Learner1D(BaseLearner):
 
         return points, loss_improvements
 
+    def _missing_bounds(self):
+        missing_bounds = []
+        for b in self.__missing_bounds:
+            if b in self.data:
+                self.__missing_bounds.remove(b)
+            elif b not in self.pending_points:
+                missing_bounds.append(b)
+        return missing_bounds
+
     def _ask_points_without_adding(self, n):
         """Return 'n' points that are expected to maximally reduce the loss.
         Without altering the state of the learner"""
@@ -511,12 +523,7 @@ class Learner1D(BaseLearner):
             return [], []
 
         # If the bounds have not been chosen yet, we choose them first.
-        missing_bounds = [
-            b
-            for b in self.bounds
-            if b not in self.data and b not in self.pending_points
-        ]
-
+        missing_bounds = self._missing_bounds()
         if len(missing_bounds) >= n:
             return missing_bounds[:n], [np.inf] * n
 
