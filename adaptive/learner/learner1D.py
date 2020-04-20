@@ -232,7 +232,7 @@ class Learner1D(BaseLearner):
 
     @cache_latest
     def loss(self, real=True):
-        if self._missing_bounds():
+        if self.__missing_bounds:
             return np.inf
         losses = self.losses if real else self.losses_combined
         if not losses:
