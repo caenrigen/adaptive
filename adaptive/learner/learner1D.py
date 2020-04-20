@@ -1,7 +1,7 @@
 import itertools
 import math
 from collections.abc import Iterable
-from copy import deepcopy
+from copy import copy, deepcopy
 
 import numpy as np
 import sortedcollections
@@ -501,7 +501,7 @@ class Learner1D(BaseLearner):
 
     def _missing_bounds(self):
         missing_bounds = []
-        for b in self.__missing_bounds:
+        for b in copy(self.__missing_bounds):
             if b in self.data:
                 self.__missing_bounds.remove(b)
             elif b not in self.pending_points:
