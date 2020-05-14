@@ -46,3 +46,11 @@ def test_avg_std_and_npoints():
             assert learner.npoints == len(learner.data)
             assert abs(learner.sum_f - values.sum()) < 1e-13
             assert abs(learner.std - std) < 1e-13
+
+
+def test_zero_mean():
+    # see https://github.com/python-adaptive/adaptive/issues/275
+    learner = AverageLearner(None, rtol=0.01)
+    learner.tell(0, -1)
+    learner.tell(1, 1)
+    learner.loss()
